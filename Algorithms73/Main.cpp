@@ -14,7 +14,7 @@ void PrintObjects(HeaderD* pStruct7) {
 	int i = 1, j = 1;
 
 	while (pTempStruct != NULL) {
-		// formatting string for printf is "%d) %s %lu %02d:%02d:%02d\n", the result is for example "1) Abcde 100 15:52:07"
+		// formatting string for printf is "%d) %s %lu %02d:%02d:%02d\n", the result is for example "1) Abcde 100 15:52:07 x"
 		printf("´[nr: %d] %c\n", i,pTempStruct->cBegin);
 		Object3* pTempObject = (Object3*)pTempStruct->pObject;
 		while (pTempObject != NULL) {
