@@ -21,7 +21,7 @@ void PrintObjects(HeaderD* pStruct7) {
 		printf("´[nr: %d] %c\n", i, cursor->cBegin);
 		Object3* pTempObject = (Object3*)cursor->pObject;
 		while (pTempObject != NULL) {
-			printf("\t (object %d): %s", j, pTempObject->pID);
+			printf("\t (object %d): %s ", j, pTempObject->pID);
 			printf("%lu %02d:%02d:%02d\n", pTempObject->Code, pTempObject->sTime1.Hour, pTempObject->sTime1.Minute, pTempObject->sTime1.Second);
 			pTempObject = pTempObject->pNext;
 			j++;
@@ -57,6 +57,16 @@ bool lowerAfterFirst(const char* str) {
 }
 
 int InsertIntoObject(HeaderD* pStruct7, char* pNewID, int NewCode) {
+	Object3* newNode = (Object3*)malloc(sizeof(Object3));
+	newNode->pID = strdup(pNewID);
+	newNode->Code = NewCode;
+	newNode->pNext = NULL;
+	while (true) {
+		//go through pID's to find the correct place
+		return 0;
+	}
+	
+
 	return 0;
 }
 
