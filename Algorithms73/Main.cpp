@@ -22,7 +22,8 @@ void PrintObjects(HeaderD* pStruct7) {
 		Object3* pTempObject = (Object3*)cursor->pObject;
 		while (pTempObject != NULL) {
 			printf("\t (object %d): %s ", j, pTempObject->pID);
-			printf("%lu %02d:%02d:%02d\n", pTempObject->Code, pTempObject->sTime1.Hour, pTempObject->sTime1.Minute, pTempObject->sTime1.Second);
+			//printf("%lu %02d:%02d:%02d\n", pTempObject->Code, pTempObject->sTime1.Hour, pTempObject->sTime1.Minute, pTempObject->sTime1.Second);
+			printf("%lu \n", pTempObject->Code);
 			pTempObject = pTempObject->pNext;
 			j++;
 		}
@@ -58,17 +59,37 @@ bool lowerAfterFirst(const char* str) {
 
 int InsertIntoObject(HeaderD* pStruct7, char* pNewID, int NewCode) {
 	Object3* newNode = (Object3*)malloc(sizeof(Object3));
-	newNode->pID = strdup(pNewID);
+	if (newNode == NULL) {
+		return -1;
+	}
+	newNode->pID = pNewID;
 	newNode->Code = NewCode;
 	newNode->pNext = NULL;
-	while (true) {
-		//go through pID's to find the correct place
-		return 0;
-	}
-	
 
-	return 0;
+	printf("obj ID: %c", &newNode->pID);
+
+	Object3* current = (Object3*)pStruct7->pObject;
+	Object3* previous = NULL;
+
+	while (current != NULL && strcmp(current->pID, pNewID) < 0) {
+		previous = current;
+		current = current->pNext;
+	}
+
+	if (previous == NULL) {
+		// Insert at the beginning
+		newNode->pNext = current;
+		pStruct7->pObject = newNode;
+	}
+	else {
+		// Insert in the middle or end
+		previous->pNext = newNode;
+		newNode->pNext = current;
+	}
+
+	return 0; // Success
 }
+
 
 int InsertNewObject(HeaderD** pStruct7, char* pNewID, int NewCode) {
 	if (!isupper(*pNewID) || !isletters(pNewID) || !lowerAfterFirst(pNewID)) {
@@ -88,6 +109,7 @@ int InsertNewObject(HeaderD** pStruct7, char* pNewID, int NewCode) {
 			newHeader->pNext = cursor;
 			cursor->pPrior->pNext = newHeader;
 			cursor->pPrior = newHeader;
+			InsertIntoObject(*pStruct7, pNewID, NewCode);
 			break;
 		}
 		cursor = cursor->pNext;
@@ -97,8 +119,8 @@ int InsertNewObject(HeaderD** pStruct7, char* pNewID, int NewCode) {
 
 int main() {
 	HeaderD* pStruct7 = GetStruct7(O, N);
-	char bruh[] = "Zuck";
-	PrintObjects(pStruct7);
+	char bruh[] = "Ouck";
 	InsertNewObject(&pStruct7, bruh, 1111);
+	//PrintObjects(pStruct7);
 	return 0;
 }
