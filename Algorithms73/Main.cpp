@@ -2,11 +2,13 @@
 #include "ctype.h"
 #include "string.h"
 #include "stdlib.h"
+#include "time.h"
 
 #include "DateTime.h"
 #include "Objects.h"
 #include "Headers.h"
 #include "Structs.h"
+
 
 #pragma warning (disable : 4996)
 
@@ -22,8 +24,8 @@ void PrintObjects(HeaderD* pStruct7) {
 		Object3* pTempObject = (Object3*)cursor->pObject;
 		while (pTempObject != NULL) {
 			printf("\t (object %d): %s ", j, pTempObject->pID);
-			//printf("%lu %02d:%02d:%02d\n", pTempObject->Code, pTempObject->sTime1.Hour, pTempObject->sTime1.Minute, pTempObject->sTime1.Second);
-			printf("%lu \n", pTempObject->Code);
+			printf("%lu %02d:%02d:%02d\n", pTempObject->Code, pTempObject->sTime1.Hour, pTempObject->sTime1.Minute, pTempObject->sTime1.Second);
+			//printf("%lu \n", pTempObject->Code);
 			pTempObject = pTempObject->pNext;
 			j++;
 		}
@@ -66,12 +68,15 @@ int InsertIntoObject(HeaderD* pStruct7, char* pNewID, int NewCode) {
 	newNode->Code = NewCode;
 	newNode->pNext = NULL;
 
-	/*newNode->pNext = (Object3*)pStruct7->pObject;
-	pStruct7->pObject = newNode;*/
+	time_t currentTime;
+	time(&currentTime);
+	struct tm* localTime = localtime(&currentTime);
 
-	printf("obj ID: %c", &newNode->pID);
+	newNode->sTime1.Hour = localTime->tm_hour;
+	newNode->sTime1.Minute = localTime->tm_min;
+	newNode->sTime1.Second = localTime->tm_sec;
 
-	Object3* current = (Object3*)pStruct7->pObject;	
+	Object3* current = (Object3*)pStruct7->pObject;
 	Object3* previous = NULL;
 
 	while (current != NULL && strcmp(current->pID, pNewID) < 0) {
@@ -152,7 +157,7 @@ int main() {
 	HeaderD* pStruct7 = GetStruct7(O, N);
 	char bruh[] = "Ayz";
 	char cuh[] = "Zyadwljhikughfgiuhqawzz";
-	InsertNewObject(&pStruct7, bruh, 1111);
+	InsertNewObject(&pStruct7, bruh, 1111); //a few tests [working 22.10.24]
 	InsertNewObject(&pStruct7, cuh, 192929);
 	PrintObjects(pStruct7);
 	return 0;
