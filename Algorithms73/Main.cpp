@@ -12,6 +12,8 @@
 
 #pragma warning (disable : 4996)
 
+void setTime(Object3*);
+
 #define O 3
 #define N 25
 
@@ -67,14 +69,7 @@ int InsertIntoObject(HeaderD* pStruct7, char* pNewID, int NewCode) {
 	newNode->pID = pNewID;
 	newNode->Code = NewCode;
 	newNode->pNext = NULL;
-
-	time_t currentTime;
-	time(&currentTime);
-	struct tm* localTime = localtime(&currentTime);
-
-	newNode->sTime1.Hour = localTime->tm_hour;
-	newNode->sTime1.Minute = localTime->tm_min;
-	newNode->sTime1.Second = localTime->tm_sec;
+	setTime(newNode);
 
 	Object3* current = (Object3*)pStruct7->pObject;
 	Object3* previous = NULL;
@@ -98,6 +93,16 @@ int InsertIntoObject(HeaderD* pStruct7, char* pNewID, int NewCode) {
 	return 0; // Success
 }
 
+void setTime(Object3* newNode) {
+
+	time_t currentTime;
+	time(&currentTime);
+	struct tm* localTime = localtime(&currentTime);
+
+	newNode->sTime1.Hour = localTime->tm_hour;
+	newNode->sTime1.Minute = localTime->tm_min;
+	newNode->sTime1.Second = localTime->tm_sec;
+}
 
 int InsertNewObject(HeaderD** pStruct7, char* pNewID, int NewCode) {	//1st func
 	if (!isupper(*pNewID) || !isletters(pNewID) || !lowerAfterFirst(pNewID)) {
