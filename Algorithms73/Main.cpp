@@ -66,9 +66,12 @@ int InsertIntoObject(HeaderD* pStruct7, char* pNewID, int NewCode) {
 	newNode->Code = NewCode;
 	newNode->pNext = NULL;
 
+	/*newNode->pNext = (Object3*)pStruct7->pObject;
+	pStruct7->pObject = newNode;*/
+
 	printf("obj ID: %c", &newNode->pID);
 
-	Object3* current = (Object3*)pStruct7->pObject;
+	Object3* current = (Object3*)pStruct7->pObject;	
 	Object3* previous = NULL;
 
 	while (current != NULL && strcmp(current->pID, pNewID) < 0) {
@@ -100,27 +103,57 @@ int InsertNewObject(HeaderD** pStruct7, char* pNewID, int NewCode) {
 	auto cursor = *pStruct7;
 	while (cursor != NULL) {
 		if (*pNewID == cursor->cBegin) {
-			break;
+			InsertIntoObject(cursor, pNewID, NewCode);
+			return 1;
 		}
 		if (*pNewID < cursor->cBegin) {
 			HeaderD* newHeader = (HeaderD*)malloc(sizeof(HeaderD));
 			newHeader->cBegin = *pNewID;
 			newHeader->pPrior = cursor->pPrior;
 			newHeader->pNext = cursor;
-			cursor->pPrior->pNext = newHeader;
+			newHeader->pObject = NULL; // Initialize the pObject pointer
+			if (cursor->pPrior != NULL) {
+				cursor->pPrior->pNext = newHeader;
+			}
+			else {
+				*pStruct7 = newHeader; // Update the head of the list
+			}
 			cursor->pPrior = newHeader;
-			InsertIntoObject(*pStruct7, pNewID, NewCode);
-			break;
+			InsertIntoObject(newHeader, pNewID, NewCode);
+			return 1;
 		}
 		cursor = cursor->pNext;
 	}
+
+	// If we reach here, it means the new header should be added at the end
+	HeaderD* newHeader = (HeaderD*)malloc(sizeof(HeaderD));
+	newHeader->cBegin = *pNewID;
+	newHeader->pPrior = NULL;
+	newHeader->pNext = NULL;
+	newHeader->pObject = NULL; // Initialize the pObject pointer
+
+	if (*pStruct7 == NULL) {
+		*pStruct7 = newHeader;
+	}
+	else {
+		cursor = *pStruct7;
+		while (cursor->pNext != NULL) {
+			cursor = cursor->pNext;
+		}
+		cursor->pNext = newHeader;
+		newHeader->pPrior = cursor;
+	}
+	InsertIntoObject(newHeader, pNewID, NewCode);
+
 	return 1;
 }
 
 int main() {
 	HeaderD* pStruct7 = GetStruct7(O, N);
-	char bruh[] = "Ouck";
+	char bruh[] = "Ayz";
+	char cuh[] = "Zyadwljhikughfgiuhqawzz";
 	InsertNewObject(&pStruct7, bruh, 1111);
-	//PrintObjects(pStruct7);
+	InsertNewObject(&pStruct7, cuh, 192929);
+	PrintObjects(pStruct7);
 	return 0;
 }
