@@ -99,7 +99,7 @@ int InsertIntoObject(HeaderD* pStruct7, char* pNewID, int NewCode) {
 }
 
 
-int InsertNewObject(HeaderD** pStruct7, char* pNewID, int NewCode) {
+int InsertNewObject(HeaderD** pStruct7, char* pNewID, int NewCode) {	//1st func
 	if (!isupper(*pNewID) || !isletters(pNewID) || !lowerAfterFirst(pNewID)) {
 		printf("Object is a string of English letters [first letter always capital, rest small]\n");
 		return 0;
@@ -152,6 +152,15 @@ int InsertNewObject(HeaderD** pStruct7, char* pNewID, int NewCode) {
 
 	return 1;
 }
+
+Object3* RemoveExistingObject(HeaderD** pStruct7, char* pExistingID) {
+	if (!isupper(*pExistingID) || !isletters(pExistingID) || !lowerAfterFirst(pExistingID)) {
+		printf("Object referenced does not exist &or is formatted incorrectly.\n");
+		return 0;
+	}
+
+}
+
 
 int main() {
 	HeaderD* pStruct7 = GetStruct7(O, N);
