@@ -20,11 +20,11 @@ void setTime(Object3*);
 void PrintObjects(HeaderD* pStruct7) {
 	int i = 1, j = 1;
 	auto cursor = pStruct7;
-	while (cursor != NULL) {
+	while (cursor != NULL) { //parse through headers (if any)
 		// formatting string for printf is "%d) %s %lu %02d:%02d:%02d\n", the result is for example "1) Abcde 100 15:52:07"
 		printf("´[nr: %d] %c\n", i, cursor->cBegin);
 		Object3* pTempObject = (Object3*)cursor->pObject;
-		while (pTempObject != NULL) {
+		while (pTempObject != NULL) { //parse through objects in header (if any) 
 			printf("\t (object %d): %s ", j, pTempObject->pID);
 			printf("%lu %02d:%02d:%02d\n", pTempObject->Code, pTempObject->sTime1.Hour, pTempObject->sTime1.Minute, pTempObject->sTime1.Second);
 			//printf("%lu \n", pTempObject->Code);
@@ -37,7 +37,7 @@ void PrintObjects(HeaderD* pStruct7) {
 }
 
 
-bool isletters(const char* str) {
+bool isletters(const char* str) { //checks if all characters in input are in alphabet
 	while (*str) {
 		if (!isalpha(*str)) {
 			return false;
@@ -47,9 +47,9 @@ bool isletters(const char* str) {
 	return true;
 }
 
-bool lowerAfterFirst(const char* str) {
+bool lowerAfterFirst(const char* str) { //checks if letters after the first are lower case
 	if (strlen(str) < 2) {
-		return true; // No characters after the first
+		return true; // No characters after the firstl
 	}
 	str++; // Skip the first character
 	while (*str) {
@@ -61,8 +61,8 @@ bool lowerAfterFirst(const char* str) {
 	return true;
 }
 
-int InsertIntoObject(HeaderD* pStruct7, char* pNewID, int NewCode) {
-	Object3* newNode = (Object3*)malloc(sizeof(Object3));
+int InsertIntoObject(HeaderD* pStruct7, char* pNewID, int NewCode) { //when in header, adds an obj/node
+	Object3* newNode = (Object3*)malloc(sizeof(Object3));			 //creates a new obj/node w/ pID, Code, pNext & sTime1
 	if (newNode == NULL) {
 		return -1;
 	}
@@ -74,7 +74,7 @@ int InsertIntoObject(HeaderD* pStruct7, char* pNewID, int NewCode) {
 	Object3* current = (Object3*)pStruct7->pObject;
 	Object3* previous = NULL;
 
-	while (current != NULL && strcmp(current->pID, pNewID) < 0) {
+	while (current != NULL && strcmp(current->pID, pNewID) < 0) { //relevant pID & find correct spot
 		previous = current;
 		current = current->pNext;
 	}
@@ -93,7 +93,7 @@ int InsertIntoObject(HeaderD* pStruct7, char* pNewID, int NewCode) {
 	return 0; // Success
 }
 
-void setTime(Object3* newNode) {
+void setTime(Object3* newNode) { //using time.h gets time of current local systime
 
 	time_t currentTime;
 	time(&currentTime);
@@ -104,14 +104,14 @@ void setTime(Object3* newNode) {
 	newNode->sTime1.Second = localTime->tm_sec;
 }
 
-int InsertNewObject(HeaderD** pStruct7, char* pNewID, int NewCode) {	//1st func
+int InsertNewObject(HeaderD** pStruct7, char* pNewID, int NewCode) {	//1st func - insert a new obj (+ header if needed)
 	if (!isupper(*pNewID) || !isletters(pNewID) || !lowerAfterFirst(pNewID)) {
 		printf("Object is a string of English letters [first letter always capital, rest small]\n");
 		return 0;
 	}
 
 	auto cursor = *pStruct7;
-	while (cursor != NULL) {
+	while (cursor != NULL) {	//parse through headers finding the correct placement
 		if (*pNewID == cursor->cBegin) {
 			InsertIntoObject(cursor, pNewID, NewCode);
 			return 1;
