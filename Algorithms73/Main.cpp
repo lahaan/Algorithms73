@@ -160,19 +160,69 @@ int InsertNewObject(HeaderD** pStruct7, char* pNewID, int NewCode) {	//1st func 
 
 Object3* RemoveExistingObject(HeaderD** pStruct7, char* pExistingID) {
 	if (!isupper(*pExistingID) || !isletters(pExistingID) || !lowerAfterFirst(pExistingID)) {
-		printf("Object referenced does not exist &or is formatted incorrectly.\n");
-		return 0;
+		printf("Object referenced does not exist or is formatted incorrectly.\n");
+		return NULL;
 	}
 
+	HeaderD* cursor = *pStruct7;
+	HeaderD* prevHeader = NULL;
+
+	while (cursor != NULL) {
+		if (cursor->cBegin == pExistingID[0]) {
+			Object3* objectToDelete = (Object3*)cursor->pObject;
+			Object3* prevObject = NULL;
+
+			while (objectToDelete != NULL && strcmp(objectToDelete->pID, pExistingID) != 0) {
+				prevObject = objectToDelete;
+				objectToDelete = objectToDelete->pNext;
+			}
+
+			if (objectToDelete != NULL) {
+				if (prevObject != NULL) {
+					prevObject->pNext = objectToDelete->pNext;
+				}
+				else {
+					cursor->pObject = objectToDelete->pNext;
+				}
+
+				free(objectToDelete);
+
+				if (cursor->pObject == NULL) {
+					if (prevHeader != NULL) {
+						prevHeader->pNext = cursor->pNext;
+					}
+					else {
+						*pStruct7 = cursor->pNext;
+					}
+					if (cursor->pNext != NULL) {
+						cursor->pNext->pPrior = prevHeader;
+					}
+					free(cursor);
+				}
+
+				return 0;
+			}
+		}
+
+		prevHeader = cursor;
+		cursor = cursor->pNext;
+	}
+
+	printf("Object not found.\n");
+	return NULL;
 }
+
 
 
 int main() {
 	HeaderD* pStruct7 = GetStruct7(O, N);
-	char bruh[] = "Ayz";
-	char cuh[] = "Zyadwljhikughfgiuhqawzz";
-	InsertNewObject(&pStruct7, bruh, 1111); //a few tests [working 22.10.24]
+	char bruh[] = "Zywdgayw";
+	char cuh[] = "Trans";
+	char del[] = "Tstcgn";
+	PrintObjects(pStruct7);
+	RemoveExistingObject(&pStruct7, del);
 	InsertNewObject(&pStruct7, cuh, 192929);
+	InsertNewObject(&pStruct7, bruh, 1111);
 	PrintObjects(pStruct7);
 	return 0;
 }
