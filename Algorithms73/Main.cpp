@@ -213,16 +213,79 @@ Object3* RemoveExistingObject(HeaderD** pStruct7, char* pExistingID) {
 }
 
 
+Node* createNode(void* pObject) {
+	Node* newNode = (Node*)malloc(sizeof(Node));
+	newNode->pObject = pObject;
+	newNode->pLeft = newNode->pRight = NULL;
+	return newNode;
+}
+
+Node* insertNode(Node* root, void* pObject) {
+	Object3* obj = (Object3*)pObject;
+	Node* newNode = createNode(pObject);
+
+	if (root == NULL) {
+		return newNode;
+	}
+
+	Node* current = root;
+	Node* parent = NULL;
+
+	while (current != NULL) {
+		parent = current;
+		Object3* currentObj = (Object3*)current->pObject;
+		if (obj->Code < currentObj->Code) {
+			current = current->pLeft;
+		}
+		else {
+			current = current->pRight;
+		}
+	}
+
+	if (obj->Code < ((Object3*)parent->pObject)->Code) {
+		parent->pLeft = newNode;
+	}
+	else {
+		parent->pRight = newNode;
+	}
+
+	return root;
+}
+
+Node* CreateBinaryTree(HeaderD* pStruct7) {
+	Node* root = NULL;
+	HeaderD* currentHeader = pStruct7;
+
+	while (currentHeader != NULL) {
+		Object3* currentObject = (Object3*)currentHeader->pObject;
+		while (currentObject != NULL) {
+			root = insertNode(root, currentObject);
+			currentObject = currentObject->pNext;
+		}
+		currentHeader = currentHeader->pNext;
+	}
+
+	return root;
+}
+
+void printTree(Node* root) {
+	if (root != NULL) {
+		printTree(root->pLeft);
+		Object3* obj = (Object3*)root->pObject;
+		printf("Code: %lu\n", obj->Code);
+		printTree(root->pRight);
+	}
+}
+
 
 int main() {
 	HeaderD* pStruct7 = GetStruct7(O, N);
 	char bruh[] = "Zywdgayw";
-	char cuh[] = "Trans";
-	char del[] = "Tstcgn";
-	PrintObjects(pStruct7);
-	RemoveExistingObject(&pStruct7, del);
-	InsertNewObject(&pStruct7, cuh, 192929);
+	char del[] = "Hfortru";
 	InsertNewObject(&pStruct7, bruh, 1111);
+	RemoveExistingObject(&pStruct7, del);
 	PrintObjects(pStruct7);
+	Node* root = CreateBinaryTree(pStruct7);
+	printTree(root);
 	return 0;
 }
