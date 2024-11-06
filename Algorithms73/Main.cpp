@@ -15,7 +15,7 @@
 void setTime(Object3*);
 
 #define O 3
-#define N 25
+#define N 35
 
 void PrintObjects(HeaderD* pStruct7) {
 	int i = 1, j = 1;
@@ -37,7 +37,7 @@ void PrintObjects(HeaderD* pStruct7) {
 }
 
 
-bool isletters(const char* str) { //checks if all characters in input are in alphabet
+bool isletters(const char* str) {									 //checks if all characters in input are in alphabet
 	while (*str) {
 		if (!isalpha(*str)) {
 			return false;
@@ -47,11 +47,11 @@ bool isletters(const char* str) { //checks if all characters in input are in alp
 	return true;
 }
 
-bool lowerAfterFirst(const char* str) { //checks if letters after the first are lower case
+bool lowerAfterFirst(const char* str) {							     //checks if letters after the first are lower case
 	if (strlen(str) < 2) {
-		return true; // No characters after the firstl
+		return true;												 //no characters after the firstl
 	}
-	str++; // Skip the first character
+	str++;														     //skip the first character
 	while (*str) {
 		if (!islower(*str)) {
 			return false;
@@ -74,26 +74,24 @@ int InsertIntoObject(HeaderD* pStruct7, char* pNewID, int NewCode) { //when in h
 	Object3* current = (Object3*)pStruct7->pObject;
 	Object3* previous = NULL;
 
-	while (current != NULL && strcmp(current->pID, pNewID) < 0) { //relevant pID & find correct spot
+	while (current != NULL && strcmp(current->pID, pNewID) < 0) {    //relevant pID & find correct spot
 		previous = current;
 		current = current->pNext;
 	}
 
-	if (previous == NULL) {
-		// Insert at the beginning
+	if (previous == NULL) {											 //insert at the beginning
 		newNode->pNext = current;
 		pStruct7->pObject = newNode;
 	}
-	else {
-		// Insert in the middle or end
+	else {															 //insert in the middle or end
 		previous->pNext = newNode;
 		newNode->pNext = current;
 	}
 
-	return 0; // Success
+	return 0;
 }
 
-void setTime(Object3* newNode) { //using time.h gets time of current local systime
+void setTime(Object3* newNode) {									 //using time.h gets time of current local systime
 
 	time_t currentTime;
 	time(&currentTime);
@@ -104,14 +102,14 @@ void setTime(Object3* newNode) { //using time.h gets time of current local systi
 	newNode->sTime1.Second = localTime->tm_sec;
 }
 
-int InsertNewObject(HeaderD** pStruct7, char* pNewID, int NewCode) {	//1st func - insert a new obj (+ header if needed)
-	if (!isupper(*pNewID) || !isletters(pNewID) || !lowerAfterFirst(pNewID)) {
+int InsertNewObject(HeaderD** pStruct7, char* pNewID, int NewCode) {//1st func - insert a new obj (+ header if needed)
+	if (!isupper(*pNewID) || !isletters(pNewID) || !lowerAfterFirst(pNewID)) { //checks if pNewID is "fitting"
 		printf("Object is a string of English letters [first letter always capital, rest small]\n");
-		return 0;
+		return 0;													
 	}
 
 	auto cursor = *pStruct7;
-	while (cursor != NULL) {	//parse through headers finding the correct placement
+	while (cursor != NULL) {										//parse through headers finding the correct placement
 		if (*pNewID == cursor->cBegin) {
 			InsertIntoObject(cursor, pNewID, NewCode);
 			return 1;
@@ -121,12 +119,12 @@ int InsertNewObject(HeaderD** pStruct7, char* pNewID, int NewCode) {	//1st func 
 			newHeader->cBegin = *pNewID;
 			newHeader->pPrior = cursor->pPrior;
 			newHeader->pNext = cursor;
-			newHeader->pObject = NULL; // Initialize the pObject pointer
+			newHeader->pObject = NULL;								//initialize the pObject pointer
 			if (cursor->pPrior != NULL) {
 				cursor->pPrior->pNext = newHeader;
 			}
 			else {
-				*pStruct7 = newHeader; // Update the head of the list
+				*pStruct7 = newHeader;								//update the head of the list
 			}
 			cursor->pPrior = newHeader;
 			InsertIntoObject(newHeader, pNewID, NewCode);
@@ -135,12 +133,11 @@ int InsertNewObject(HeaderD** pStruct7, char* pNewID, int NewCode) {	//1st func 
 		cursor = cursor->pNext;
 	}
 
-	// If we reach here, it means the new header should be added at the end
-	HeaderD* newHeader = (HeaderD*)malloc(sizeof(HeaderD));
+	HeaderD* newHeader = (HeaderD*)malloc(sizeof(HeaderD));			//last one (end of list)
 	newHeader->cBegin = *pNewID;
 	newHeader->pPrior = NULL;
 	newHeader->pNext = NULL;
-	newHeader->pObject = NULL; // Initialize the pObject pointer
+	newHeader->pObject = NULL;										//initialize the pObject pointer
 
 	if (*pStruct7 == NULL) {
 		*pStruct7 = newHeader;
@@ -160,7 +157,7 @@ int InsertNewObject(HeaderD** pStruct7, char* pNewID, int NewCode) {	//1st func 
 
 Object3* RemoveExistingObject(HeaderD** pStruct7, char* pExistingID) {
 	if (!isupper(*pExistingID) || !isletters(pExistingID) || !lowerAfterFirst(pExistingID)) {
-		printf("Object referenced does not exist or is formatted incorrectly.\n");
+		printf("Object referenced does not exist or is formatted incorrectly.\n"); //checks if ID that is wanted to remove is valid
 		return NULL;
 	}
 
@@ -278,14 +275,34 @@ void printTree(Node* root) {
 }
 
 
+/*
+	1. N = 35. 
+	2. V‰ljastada l‰htestruktuur. 
+	3. Lisada antud j‰rjekorras objektid identifikaatoritega: Dx, Db, Dz, Dk, Aa, Wu, Wa, 
+	Zw, Za, wk, Wa, WW, W8, W_  ja v‰ljastada tulemus. Liikme Code v‰‰rtuseks 
+	vıib valida suvalise postiivse t‰isarvu.  M‰rkus: viie viimase objekti lisamine peab 
+	andma veateate. 
+	4. Samas j‰rjekorras eemaldada lisatud objektid ja v‰ljastada muudetud struktuur. 
+	M‰rkus: viie viimase objekti eemaldamise katse peab andma veateate. 
+*/
+
+
 int main() {
 	HeaderD* pStruct7 = GetStruct7(O, N);
-	char bruh[] = "Zywdgayw";
-	char del[] = "Hfortru";
-	InsertNewObject(&pStruct7, bruh, 1111);
-	RemoveExistingObject(&pStruct7, del);
+	PrintObjects(pStruct7);	//2. V‰ljastada l‰htestruktuur
+	
+	const char* itemIdList[] = { "Dx", "Db", "Dz", "Dk", "Aa", "Wu", "Wa", "Zw", "Za", "wk", "Wa", "WW", "W8", "W_" }; 
+	int itemCodeList[] = { 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113 };
+	int size = sizeof(itemIdList) / sizeof(itemIdList[0]);
+	for (int i = 0; i < size; i++) {	//3. Lisada objektid + lisada elemendid mis sobivad + veateade + v‰ljastus
+		InsertNewObject(&pStruct7, (char*)itemIdList[i], itemCodeList[i]);
+	}
 	PrintObjects(pStruct7);
-	Node* root = CreateBinaryTree(pStruct7);
-	printTree(root);
+	
+	for (int i = 0; i < size; i++) {	//4. Eemaldada lisatud objektid + v‰ljastus
+		RemoveExistingObject(&pStruct7, (char*)itemIdList[i]);
+	}
+	PrintObjects(pStruct7);
+
 	return 0;
 }
