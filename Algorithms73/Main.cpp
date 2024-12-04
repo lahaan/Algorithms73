@@ -102,10 +102,10 @@ void setTime(Object3* newNode) {									 //using time.h gets time of current lo
 	newNode->sTime1.Second = localTime->tm_sec;
 }
 
-int InsertNewObject(HeaderD** pStruct7, char* pNewID, int NewCode) {//1st func - insert a new obj (+ header if needed)
+int InsertNewObject(HeaderD** pStruct7, char* pNewID, int NewCode) {//1st fu	nc - insert a new obj (+ header if needed)
 	if (!isupper(*pNewID) || !isletters(pNewID) || !lowerAfterFirst(pNewID)) { //checks if pNewID is "fitting"
 		printf("Object is a string of English letters [first letter always capital, rest small]\n");
-		return 0;													
+		return 0;
 	}
 
 	auto cursor = *pStruct7;
@@ -222,6 +222,7 @@ Node* insertNode(Node* root, void* pObject) {
 	Node* newNode = createNode(pObject);
 
 	if (root == NULL) {
+		printf("*Inserted as root node: %s [%d]\n\n", obj->pID, obj->Code);
 		return newNode;
 	}
 
@@ -231,23 +232,30 @@ Node* insertNode(Node* root, void* pObject) {
 	while (current != NULL) {
 		parent = current;
 		Object3* currentObj = (Object3*)current->pObject;
+
 		if (obj->Code < currentObj->Code) {
+			printf("  *Traversing <- from %s (%d)\n", currentObj->pID, currentObj->Code);
 			current = current->pLeft;
 		}
 		else {
+			printf("  *Traversing -> from %s (%d)\n", currentObj->pID, currentObj->Code);
 			current = current->pRight;
 		}
 	}
 
-	if (obj->Code < ((Object3*)parent->pObject)->Code) {
+	Object3* parentObj = (Object3*)parent->pObject;
+	if (obj->Code < parentObj->Code) {
 		parent->pLeft = newNode;
+		printf("    *Inserted %s (%d) <- %s (%d)\n\n", obj->pID, obj->Code, parentObj->pID, parentObj->Code);
 	}
 	else {
 		parent->pRight = newNode;
+		printf("    *Inserted %s (%d) -> %s (%d)\n\n", obj->pID, obj->Code, parentObj->pID, parentObj->Code);
 	}
 
 	return root;
 }
+
 
 Node* CreateBinaryTree(HeaderD* pStruct7) {
 	Node* root = NULL;
@@ -274,35 +282,113 @@ void printTree(Node* root) {
 	}
 }
 
+Stack* Push(Stack* pStack, void* pObject) {
+	Stack* newNode = (Stack*)malloc(sizeof(Stack));
+	newNode->pObject = pObject;
+	newNode->pNext = pStack;
+	return newNode;
+}
 
-/*
-	1. N = 35. 
-	2. V‰ljastada l‰htestruktuur. 
-	3. Lisada antud j‰rjekorras objektid identifikaatoritega: Dx, Db, Dz, Dk, Aa, Wu, Wa, 
-	Zw, Za, wk, Wa, WW, W8, W_  ja v‰ljastada tulemus. Liikme Code v‰‰rtuseks 
-	vıib valida suvalise postiivse t‰isarvu.  M‰rkus: viie viimase objekti lisamine peab 
-	andma veateate. 
-	4. Samas j‰rjekorras eemaldada lisatud objektid ja v‰ljastada muudetud struktuur. 
-	M‰rkus: viie viimase objekti eemaldamise katse peab andma veateate. 
+Stack* Pop(Stack* pStack, void** pResult) {
+	if (!pStack) {
+		*pResult = NULL;
+		return NULL;
+	}
+	*pResult = pStack->pObject;
+	Stack* nextStack = pStack->pNext;
+	free(pStack);
+	return nextStack;
+}
+
+void TreeTraversal(Node* pTree)
+{
+	printf("\nPRINTING BINARY TREE:\n\n\n");
+	Stack* pStack = NULL;
+	Node* p1 = pTree, * p2;
+	int nodeCounter = 1;
+
+	if (!pTree) return;
+
+	do
+	{
+		// Traverse to the leftmost node
+		while (p1)
+		{
+			pStack = Push(pStack, p1);
+			p1 = p1->pLeft;
+		}
+
+		// Pop from the stack
+		pStack = Pop(pStack, (void**)&p2);
+
+		// Process the current node directly here
+		if (p2 && p2->pObject)
+		{
+			Object3* obj = (Object3*)p2->pObject;
+			printf("Node %d: %s %lu %02d:%02d:%02d\n",
+				nodeCounter++,
+				obj->pID,
+				obj->Code,
+				obj->sTime1.Hour,
+				obj->sTime1.Minute,
+				obj->sTime1.Second);
+		}
+
+		// Move to the right child
+		p1 = p2 ? p2->pRight : NULL;
+
+	} while (pStack || p1);
+}
+
+
+
+
+/*	ESIMESE OSA TESTIDE KIRJELDUSED
+	1. N = 35.
+	2. V‰ljastada l‰htestruktuur.
+	3. Lisada antud j‰rjekorras objektid identifikaatoritega: Dx, Db, Dz, Dk, Aa, Wu, Wa,
+	Zw, Za, wk, Wa, WW, W8, W_  ja v‰ljastada tulemus. Liikme Code v‰‰rtuseks
+	vıib valida suvalise postiivse t‰isarvu.  M‰rkus: viie viimase objekti lisamine peab
+	andma veateate.
+	4. Samas j‰rjekorras eemaldada lisatud objektid ja v‰ljastada muudetud struktuur.
+	M‰rkus: viie viimase objekti eemaldamise katse peab andma veateate.
 */
 
 
 int main() {
+
+
+	HeaderD* pStruct7 = GetStruct7(O, 10);
+
+	// 4. Create binary tree
+	Node* tree = CreateBinaryTree(pStruct7);
+
+	// 5. Traverse and print the binary tree
+	printf("\nTREE TRAVERSAL:");
+	TreeTraversal(tree);
+
+	printf("\nIn-order Output:\n"); //Unnecessary - just to print out the Codes in order
+	printTree(tree);
+
+
+
+	return 0;
+}
+
+
+/* 1. OSA TESTID
 	HeaderD* pStruct7 = GetStruct7(O, N);
 	PrintObjects(pStruct7);	//2. V‰ljastada l‰htestruktuur
-	
-	const char* itemIdList[] = { "Dx", "Db", "Dz", "Dk", "Aa", "Wu", "Wa", "Zw", "Za", "wk", "Wa", "WW", "W8", "W_" }; 
+
+	const char* itemIdList[] = { "Dx", "Db", "Dz", "Dk", "Aa", "Wu", "Wa", "Zw", "Za", "wk", "Wa", "WW", "W8", "W_" };
 	int itemCodeList[] = { 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113 };
 	int size = sizeof(itemIdList) / sizeof(itemIdList[0]);
 	for (int i = 0; i < size; i++) {	//3. Lisada objektid + lisada elemendid mis sobivad + veateade + v‰ljastus
 		InsertNewObject(&pStruct7, (char*)itemIdList[i], itemCodeList[i]);
 	}
 	PrintObjects(pStruct7);
-	
+
 	for (int i = 0; i < size; i++) {	//4. Eemaldada lisatud objektid + v‰ljastus
 		RemoveExistingObject(&pStruct7, (char*)itemIdList[i]);
 	}
-	PrintObjects(pStruct7);
-
-	return 0;
-}
+	PrintObjects(pStruct7);*/
