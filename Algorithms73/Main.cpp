@@ -104,7 +104,7 @@ void setTime(Object3* newNode) {									 //using time.h gets time of current lo
 
 int InsertNewObject(HeaderD** pStruct7, char* pNewID, int NewCode) {//1st fu	nc - insert a new obj (+ header if needed)
 	if (!isupper(*pNewID) || !isletters(pNewID) || !lowerAfterFirst(pNewID)) { //checks if pNewID is "fitting"
-		printf("Object is a string of English letters [first letter always capital, rest small]\n");
+		printf("ERROR: Object is a string of English letters [first letter always capital, rest small]\n");
 		return 0;
 	}
 
@@ -157,7 +157,7 @@ int InsertNewObject(HeaderD** pStruct7, char* pNewID, int NewCode) {//1st fu	nc 
 
 Object3* RemoveExistingObject(HeaderD** pStruct7, char* pExistingID) {
 	if (!isupper(*pExistingID) || !isletters(pExistingID) || !lowerAfterFirst(pExistingID)) {
-		printf("Object referenced does not exist or is formatted incorrectly.\n"); //checks if ID that is wanted to remove is valid
+		printf("ERROR: Object referenced does not exist or is formatted incorrectly.\n"); //checks if ID that is wanted to remove is valid
 		return NULL;
 	}
 
@@ -210,14 +210,14 @@ Object3* RemoveExistingObject(HeaderD** pStruct7, char* pExistingID) {
 }
 
 
-Node* createNode(void* pObject) {
+Node* createNode(void* pObject) { //comments
 	Node* newNode = (Node*)malloc(sizeof(Node));
 	newNode->pObject = pObject;
 	newNode->pLeft = newNode->pRight = NULL;
 	return newNode;
 }
 
-Node* insertNode(Node* root, void* pObject) {
+Node* insertNode(Node* root, void* pObject) { //todo comments
 	Object3* obj = (Object3*)pObject;
 	Node* newNode = createNode(pObject);
 
@@ -257,7 +257,7 @@ Node* insertNode(Node* root, void* pObject) {
 }
 
 
-Node* CreateBinaryTree(HeaderD* pStruct7) {
+Node* CreateBinaryTree(HeaderD* pStruct7) { //comments
 	Node* root = NULL;
 	HeaderD* currentHeader = pStruct7;
 
@@ -273,7 +273,7 @@ Node* CreateBinaryTree(HeaderD* pStruct7) {
 	return root;
 }
 
-void printTree(Node* root) {
+void printTree(Node* root) { //comments
 	if (root != NULL) {
 		printTree(root->pLeft);
 		Object3* obj = (Object3*)root->pObject;
@@ -282,14 +282,14 @@ void printTree(Node* root) {
 	}
 }
 
-Stack* Push(Stack* pStack, void* pObject) {
+Stack* Push(Stack* pStack, void* pObject) { //comments
 	Stack* newNode = (Stack*)malloc(sizeof(Stack));
 	newNode->pObject = pObject;
 	newNode->pNext = pStack;
 	return newNode;
 }
 
-Stack* Pop(Stack* pStack, void** pResult) {
+Stack* Pop(Stack* pStack, void** pResult) { //comments
 	if (!pStack) {
 		*pResult = NULL;
 		return NULL;
@@ -300,7 +300,7 @@ Stack* Pop(Stack* pStack, void** pResult) {
 	return nextStack;
 }
 
-void TreeTraversal(Node* pTree)
+void TreeTraversal(Node* pTree) //comments + more comprehensive testing required
 {
 	printf("\nPRINTING BINARY TREE:\n\n\n");
 	Stack* pStack = NULL;
@@ -340,6 +340,108 @@ void TreeTraversal(Node* pTree)
 	} while (pStack || p1);
 }
 
+Node* DeleteTreeNode(Node* pTree, unsigned long int Code) { //testing
+	Node* parent = NULL;
+	Node* current = pTree;
+
+	if (!pTree) {	//Kontrollib kas puu on tühine
+		printf("ERROR: Tree is empty. Nothing to delete.\n");
+		return NULL;
+	}
+
+	// Step 2: Find the node to delete and its parent
+	while (current && ((Object3*)current->pObject)->Code != Code) {
+		parent = current;
+		if (Code < ((Object3*)current->pObject)->Code) {
+			printf("Traversing left from %s\n", ((Object3*)current->pObject)->pID);
+			current = current->pLeft;
+		}
+		else {
+			printf("Traversing right from %s\n", ((Object3*)current->pObject)->pID);
+			current = current->pRight;
+		}
+	}
+
+	// If the node was not found
+	if (!current) {
+		printf("ERROR: Code %lu not found in the tree.\n", Code);
+		return pTree;
+	}
+
+	// Step 3: Handle the deletion cases
+
+	// Case 1: Node has no children (leaf node)
+	if (!current->pLeft && !current->pRight) {
+		if (!parent) {
+			// Deleting the root node with no children
+			printf("Deleting the root node: %s (leaf node)\n", ((Object3*)current->pObject)->pID);
+			pTree = NULL;
+		}
+		else if (parent->pLeft == current) {
+			parent->pLeft = NULL;
+		}
+		else {
+			parent->pRight = NULL;
+		}
+		printf("Deleting node: %s (leaf node)\n", ((Object3*)current->pObject)->pID);
+		free(current->pObject);
+		free(current);
+	}
+	// Case 2: Node has only one child (left or right)
+	else if (!current->pLeft || !current->pRight) {
+		Node* child = current->pLeft ? current->pLeft : current->pRight;
+
+		if (!parent) {
+			// Deleting the root node with one child
+			printf("Deleting the root node: %s (single child)\n", ((Object3*)current->pObject)->pID);
+			pTree = child;
+		}
+		else if (parent->pLeft == current) {
+			parent->pLeft = child;
+		}
+		else {
+			parent->pRight = child;
+		}
+		printf("Deleting node: %s (single child)\n", ((Object3*)current->pObject)->pID);
+		free(current->pObject);
+		free(current);
+	}
+	// Case 3: Node has two children
+	else {
+		Node* successorParent = current;
+		Node* successor = current->pRight;
+
+		// Find the in-order successor (smallest in the right subtree)
+		while (successor->pLeft) {
+			successorParent = successor;
+			successor = successor->pLeft;
+		}
+
+		// Replace current node's object with the successor's object
+		printf("Replacing node: %s with in-order successor: %s\n",
+			((Object3*)current->pObject)->pID, ((Object3*)successor->pObject)->pID);
+		free(current->pObject);
+		current->pObject = malloc(sizeof(Object3));
+		memcpy(current->pObject, successor->pObject, sizeof(Object3));
+
+		// Remove the in-order successor
+		if (successorParent->pLeft == successor) {
+			successorParent->pLeft = successor->pRight;
+		}
+		else {
+			successorParent->pRight = successor->pRight;
+		}
+
+		printf("Deleting in-order successor: %s\n", ((Object3*)successor->pObject)->pID);
+		free(successor->pObject);
+		free(successor);
+	}
+
+	return pTree;
+}
+
+
+
 
 
 
@@ -358,6 +460,7 @@ void TreeTraversal(Node* pTree)
 int main() {
 
 
+	/* preliminary
 	HeaderD* pStruct7 = GetStruct7(O, 10);
 
 	// 4. Create binary tree
@@ -369,6 +472,35 @@ int main() {
 
 	printf("\nIn-order Output:\n"); //Unnecessary - just to print out the Codes in order
 	printTree(tree);
+
+	tree = DeleteTreeNode(tree, 101110100);		//deletion process
+	tree = DeleteTreeNode(tree, 6262525129);
+	TreeTraversal(tree);*/
+
+
+	HeaderD* pStruct7 = GetStruct7(O, 35);
+	// 2. Väljastada lähtestruktuur.
+	PrintObjects(pStruct7);
+	// 3. Moodustada kahendpuu ja käies läbi kõik tema tipud väljastada tippude juurde kuuluvad objektid
+	Node* pBinaryTree = CreateBinaryTree(pStruct7);
+	TreeTraversal(pBinaryTree);
+	// 4. Eemaldada  puu  juurtipp  ja  käies  läbi  kõik  uue  puu  tipud  väljastada  tippude juurde kuuluvad objektid.
+	pBinaryTree = DeleteTreeNode(pBinaryTree, 316985719);
+	TreeTraversal(pBinaryTree);
+	// 5. N=10
+	pStruct7 = GetStruct7(O, 10);
+	// 6. Väljastada lähtestruktuur.
+	PrintObjects(pStruct7);
+	// 7. Moodustada kahendpuu ja käies läbi kõik tema tipud väljastada tippude juurde kuuluvad objektid.
+	pBinaryTree = CreateBinaryTree(pStruct7);
+	TreeTraversal(pBinaryTree);
+	// 8. Joonistada saadud kahendpuu paberile, märkides tippude juurde üksnes nende võtmed.
+	// 9. Eemaldada kahendpuust juhendaja näidatud võtmetega tipud ja käies läbi kõik uue puu tipud väljastada tippude juurde kuuluvad objektid.
+	pBinaryTree = DeleteTreeNode(pBinaryTree, 1234);
+	TreeTraversal(pBinaryTree);
+	// 10. Teha katse eemaldada tipp, mida ei olegi olemas.
+	pBinaryTree = DeleteTreeNode(pBinaryTree, 1234);
+	TreeTraversal(pBinaryTree);
 
 
 
@@ -392,3 +524,72 @@ int main() {
 		RemoveExistingObject(&pStruct7, (char*)itemIdList[i]);
 	}
 	PrintObjects(pStruct7);*/
+
+
+/*
+	Teise osa kontrolltestid: 
+	1. N=35.
+	2. Väljastada lähtestruktuur.
+	46
+	3. Moodustada kahendpuu ja käies läbi kõik tema tipud väljastada tippude juurde
+	kuuluvad objektid.
+	4. Eemaldada puu juurtipp ja käies läbi kõik uue puu tipud väljastada tippude juurde
+	kuuluvad objektid.
+	5. N=10.
+	6. Väljastada lähtestruktuur.
+	7. Moodustada kahendpuu ja käies läbi kõik tema tipud väljastada tippude juurde
+	kuuluvad objektid.
+	8. Joonistada saadud kahendpuu paberile, märkides tippude juurde üksnes nende
+	võtmed.
+	9. Eemaldada kahendpuust juhendaja näidatud võtmetega tipud ja käies läbi kõik
+	uue puu tipud väljastada tippude juurde kuuluvad objektid.
+	10. Teha katse eemaldada tipp, mida ei olegi olemas.
+*/
+/*
+
+	6-func
+Node *DeleteTreeNode(Node *pTree, unsigned long int Code);
+Sisendparameetriks on viit neljanda funktsiooni poolt ehitatud puule ja võimalikule
+koodile. Funktsiooni ülesandeks on eemaldada puust tipp, mis viitab etteantud liiget Code
+sisaldavale objektile. Väljundparameetriks on viit pärast eemaldamist saadud puu
+juurtipule.
+Funktsioon peab olema mitterekursiivne. Tema kirjutamisel lähtuge slaididest "Kirje
+eemaldamine kahendpuust (1)" ja "Kirje eemaldamine kahendpuust (2)".
+Funktsiooni katsetades proovige kindlasti läbi järgmised olukorrad:
+1. Eemaldatav tipp on puu juureks.
+2. Eemaldataval tipul ei ole tütartippe.
+3. Eemaldataval tipul on ainult parempoolne tütartipp.
+4. Eemaldataval tipul on ainult vasakpoolne tütartipp.
+5. Eemaldataval tipul on mõlemad tütartipud.
+6. Etteantud koodiga kirjet ei olegi.
+
+
+*/
+
+/* #grabbed from github/JamFox
+1.N=35
+pStruct7 = GetStruct7(O, 35);
+// 2. Väljastada lähtestruktuur.
+PrintObjects(pStruct7);
+// 3. Moodustada kahendpuu ja käies läbi kõik tema tipud väljastada tippude juurde kuuluvad objektid
+Node* pBinaryTree = CreateBinaryTree(pStruct7);
+TreeTraversal(pBinaryTree, ProcessNode);
+// 4. Eemaldada  puu  juurtipp  ja  käies  läbi  kõik  uue  puu  tipud  väljastada  tippude juurde kuuluvad objektid.
+pBinaryTree = DeleteTreeNode(pBinaryTree, 316985719);
+TreeTraversal(pBinaryTree, ProcessNode);
+// 5. N=10
+pStruct7 = GetStruct7(O, 10);
+// 6. Väljastada lähtestruktuur.
+PrintObjects(pStruct7);
+// 7. Moodustada kahendpuu ja käies läbi kõik tema tipud väljastada tippude juurde kuuluvad objektid.
+pBinaryTree = CreateBinaryTree(pStruct7);
+TreeTraversal(pBinaryTree, ProcessNode);
+// 8. Joonistada saadud kahendpuu paberile, märkides tippude juurde üksnes nende võtmed.
+// 9. Eemaldada kahendpuust juhendaja näidatud võtmetega tipud ja käies läbi kõik uue puu tipud väljastada tippude juurde kuuluvad objektid.
+pBinaryTree = DeleteTreeNode(pBinaryTree, 1234);
+TreeTraversal(pBinaryTree, ProcessNode);
+// 10. Teha katse eemaldada tipp, mida ei olegi olemas.
+pBinaryTree = DeleteTreeNode(pBinaryTree, 1234);
+TreeTraversal(pBinaryTree, ProcessNode);
+
+*/
